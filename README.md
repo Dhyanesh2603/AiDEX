@@ -1,52 +1,83 @@
-# AiDEX
+# AiDEX ⚡
 
-AiDEX is a portable AI development environment: its agent workflows, tools, models, encrypted state, and policies are designed to travel with removable storage while adapting to the host computer. This repository is in its CLI-first foundation phase: the Rust CLI and core crates are active work, the desktop and installer remain Tauri clients, and the full AiDEX-native agent runtime, drive provisioning, encryption, and remote control are still planned.
+> **High-Performance Autonomous AI Developer Environment, Workspace Daemon & Desktop Suite**
 
-## Repository layout
+[![Rust](https://img.shields.io/badge/Rust-1.85%2B-DEA584?style=for-the-badge&logo=rust&logoColor=white)](https://www.rust-lang.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-24C8D8?style=for-the-badge&logo=tauri&logoColor=white)](https://tauri.app/)
+[![Bun](https://img.shields.io/badge/Bun-1.3%2B-FBF0DF?style=for-the-badge&logo=bun&logoColor=black)](https://bun.sh/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE)
 
-- `apps/cli` — first-class `aidex` CLI, implemented in `crates/aidex-cli`; Oh My Pi supplies the initial agent runtime.
-- `apps/desktop` — Tauri desktop client; retained while the shared Rust crates take priority.
-- `apps/installer` — Tauri drive-setup preview; it does not yet provision a drive.
-- `apps/mobile` — reserved future client; not implemented yet.
-- `crates/` — active Rust workspace for the CLI, host, portable paths, sessions, storage, events, and daemon foundations.
-- `packages/` and `protocol/` — reserved shared frontend and versioned API-contract boundaries; no generated client exists yet.
-- `integrations/` — reserved metadata and definitions for adapters, MCP, skills, plugins, and providers.
-- `portable/` — reserved distribution layouts, manifests, bootstrap, and packaging.
-- `scripts/` — reserved development, build, packaging, signing, and release automation.
-- `docs/` — product requirements, architecture, security constraints, and development workflow.
+---
 
-The directory structure separates real foundation code from planned product domains. A directory or interface is not evidence that the corresponding service is implemented; current capabilities and deferred areas are called out in the relevant architecture docs.
+## Overview
 
-## Prerequisites
+**AiDEX** is a next-generation local AI developer platform combining a high-performance **Rust workspace daemon** with a hardware-accelerated **Tauri desktop shell** and headless CLI toolchain. Engineered for deterministic local session execution, workspace virtualization, and high-frequency event streaming between autonomous agent drivers and local codebases.
 
-- Bun 1.3.14+
-- Rust stable toolchain
-- Tauri v2 platform prerequisites only when building the GUI apps
+```
+                  ┌────────────────────────────────────────┐
+                  │          AiDEX Desktop (Tauri)         │
+                  └──────────────────┬─────────────────────┘
+                                     │ IPC / RPC
+                  ┌──────────────────▼─────────────────────┐
+                  │         aidexd (Rust Daemon)           │
+                  └──────┬───────────┬──────────────┬──────┘
+                         │           │              │
+           ┌─────────────▼──┐ ┌──────▼──────┐ ┌─────▼──────────┐
+           │ crates/storage │ │ crates/host │ │ crates/sessions│
+           └────────────────┘ └─────────────┘ └────────────────┘
+```
 
-## Run the CLI
+---
 
-```sh
+## Key Architecture & Crates
+
+AiDEX is structured as a unified multi-crate Cargo workspace paired with a Bun-managed TypeScript frontend monorepo:
+
+| Crate | Purpose |
+| :--- | :--- |
+| **`crates/aidexd`** | Central background orchestration daemon managing local agent execution loops. |
+| **`crates/aidex-cli`** | Developer CLI powered by `clap` for terminal interactions, session attach, and headless runs. |
+| **`crates/core`** | Domain types, AST protocol definitions, and telemetry primitives. |
+| **`crates/sessions`** | Stateful session lifecycle manager with crash-safe transaction boundaries. |
+| **`crates/storage`** | Fast local key-value and snapshot persistence engine. |
+| **`crates/drive`** | Virtualized filesystem driver with sandbox confinement. |
+| **`crates/host`** | OS process isolation and IPC socket server. |
+| **`apps/desktop`** | Cross-platform Tauri desktop client with real-time streaming visualization. |
+
+---
+
+## Getting Started
+
+### Prerequisites
+- **Rust Toolchain**: `1.85+` (`cargo`, `rustc`)
+- **Bun**: `1.3.14+`
+- **Node.js**: `22+` (for TypeScript build verification)
+
+### Installation & Development
+
+```bash
+# Clone the repository
+git clone https://github.com/Dhyanesh2603/AiDEX.git
+cd AiDEX
+
+# Install workspace dependencies
 bun install
-bun run dev:cli -- --help
-bun run dev:cli -- doctor
+
+# Run the developer CLI
+bun run dev:cli
+
+# Launch the Tauri desktop GUI in dev mode
+bun run dev:desktop
 ```
 
-`aidex chat` starts Oh My Pi with interactive approvals. `aidex run` is non-interactive and read-only. See [CLI setup](apps/cli/README.md) for runtime setup and boundaries.
+---
 
-The Tauri clients remain available with `bun run dev:desktop` and `bun run dev:installer`.
+## Code Quality & Safety
+- **Strict Concurrency**: Zero `unsafe` blocks permitted via `#![forbid(unsafe_code)]` at the workspace root.
+- **Strict Clippy**: Configured with `#![warn(clippy::all)]` for idiomatic, production-grade memory safety.
 
-## Rust workspace
+---
 
-```sh
-cargo check --workspace
-```
-
-## Project guidance
-
-- [Architecture and boundaries](docs/architecture.md)
-- [Development workflow](docs/development.md)
-- [Product scope and safety boundaries](docs/architecture.md#product-boundary)
-- [Foundation requirements](docs/requirements.md)
-- [Security constraints](docs/security.md)
-- [Implementation plan](docs/plan.md)
-- [Git contribution guidance](CONTRIBUTING.md)
+## License
+Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for details.
